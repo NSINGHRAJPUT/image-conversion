@@ -36,8 +36,6 @@ export default function Home() {
     "j2c",
     "jxl",
   ];
-
-  // Handle file change and validate extension
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
       const file = e.target.files[0];
