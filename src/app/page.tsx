@@ -1,22 +1,25 @@
 "use client";
 
 import axios from "axios";
-import { useState } from "react";
+import { ChangeEvent, FormEvent, useState } from "react";
 
 export default function Home() {
-  const [selectedFile, setSelectedFile] = useState(null);
-  const [format, setFormat] = useState("png"); // Default format
-  const [convertedImage, setConvertedImage] = useState(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [format, setFormat] = useState<string>("png"); // Default format
+  const [convertedImage, setConvertedImage] = useState<string | null>(null);
 
-  const handleFileChange = (e) => {
-    setSelectedFile(e.target.files[0]);
+  // Explicitly type the ChangeEvent for file input
+  const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      setSelectedFile(e.target.files[0]);
+    }
   };
 
-  const handleFormatChange = (e) => {
+  const handleFormatChange = (e: ChangeEvent<HTMLSelectElement>) => {
     setFormat(e.target.value);
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!selectedFile) return;
 
