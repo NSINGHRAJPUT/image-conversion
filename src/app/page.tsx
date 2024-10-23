@@ -4,12 +4,15 @@ import axios from "axios";
 import Image from "next/image";
 import { ChangeEvent, FormEvent, useState } from "react";
 import { Toaster, toast } from "react-hot-toast";
+import Loading from "./Loading";
+import "./globals.css";
 
 export default function Home() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [fromFormat, setFromFormat] = useState<string>("jpeg"); // Default from format
   const [toFormat, setToFormat] = useState<string>("png"); // Default to format
   const [convertedImage, setConvertedImage] = useState<string | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
 
   // Supported formats by 'sharp'
   const formats = [
@@ -57,7 +60,7 @@ export default function Home() {
   // Handle form submission
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-
+    setLoading(true);
     // Validate all fields are filled
     if (!selectedFile) {
       return toast.error("Please select a file to convert!");
@@ -88,12 +91,15 @@ export default function Home() {
     } catch (error) {
       console.error("Error converting file", error);
       toast.error("Failed to convert the image!");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div className=" w-full min-h-screen py-8 bg-gray-200">
+    <div className="relative w-full min-h-screen py-8 bg-gray-200">
       <Toaster />
+      <Loading loading={loading} />
       <div className="mx-[5%] md:mx-[10%] shadow-2xl bg-white p-8">
         <h1 className="text-3xl font-bold text-center mb-8">Image Converter</h1>
         <form
@@ -101,7 +107,9 @@ export default function Home() {
           className="max-w-xl shadow-xl mx-auto p-6 bg-white border-gray-200 border-[1px] rounded-md"
         >
           <div className="mb-4">
-            <label className="block mb-2 font-semibold">Select an image:</label>
+            <label className="block mb-2 font-semibold text-black">
+              Select an image:
+            </label>
             <input
               type="file"
               accept="image/*"
@@ -113,11 +121,13 @@ export default function Home() {
           <div className="mb-4 flex justify-between">
             {/* Convert from dropdown */}
             <div className="w-1/2 mr-2">
-              <label className="block mb-2 font-semibold">Convert from:</label>
+              <label className="block mb-2 font-semibold text-black">
+                Convert from:
+              </label>
               <select
                 value={fromFormat}
                 onChange={handleFromFormatChange}
-                className="w-full px-4 py-2 border rounded-md"
+                className="w-full outline-none border-none text-white bg-gray-500 px-4 py-2 border rounded-md"
               >
                 {formats.map((format) => (
                   <option key={format} value={format}>
@@ -129,11 +139,13 @@ export default function Home() {
 
             {/* Convert to dropdown */}
             <div className="w-1/2 ml-2">
-              <label className="block mb-2 font-semibold">Convert to:</label>
+              <label className="block mb-2 font-semibold text-black">
+                Convert to:
+              </label>
               <select
                 value={toFormat}
                 onChange={handleToFormatChange}
-                className="w-full px-4 py-2 border rounded-md"
+                className="w-full outline-none border-none text-white bg-gray-500 px-4 py-2 border rounded-md"
               >
                 {/* Only show options that are not selected as 'From' */}
                 {formats
