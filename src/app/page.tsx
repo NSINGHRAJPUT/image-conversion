@@ -9,10 +9,10 @@ import "./globals.css";
 
 export default function Home() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [fromFormat, setFromFormat] = useState<string>("jpeg"); // Default from format
   const [toFormat, setToFormat] = useState<string>("png"); // Default to format
   const [convertedImage, setConvertedImage] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
+  const [fileExtension, setFileExtension] = useState<string>("");
 
   // Supported formats by 'sharp'
   const formats = [
@@ -37,19 +37,20 @@ export default function Home() {
     "jxl",
   ];
 
-  // Handle file change
+  // Handle file change and validate extension
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
-      setSelectedFile(e.target.files[0]);
-    }
-  };
+      const file = e.target.files[0];
+      const extension = file.name.split(".").pop()?.toLowerCase() || "";
 
-  // Handle format change for 'From' and 'To' fields
-  const handleFromFormatChange = (e: ChangeEvent<HTMLSelectElement>) => {
-    setFromFormat(e.target.value);
-    // Reset 'To' format if it was the same as the new 'From' format
-    if (e.target.value === toFormat) {
-      setToFormat("");
+      // Check if the file extension is supported by 'sharp'
+      if (formats.includes(extension)) {
+        setSelectedFile(file);
+        setFileExtension(extension);
+      } else {
+        setSelectedFile(null);
+        toast.error(`File format .${extension} is not supported!`);
+      }
     }
   };
 
@@ -61,18 +62,15 @@ export default function Home() {
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
-    // Validate all fields are filled
+
     if (!selectedFile) {
-      return toast.error("Please select a file to convert!");
-    }
-    if (!fromFormat || !toFormat) {
-      return toast.error("Please select both 'From' and 'To' formats!");
+      return toast.error("Please select a valid image file to convert!");
     }
 
     const formData = new FormData();
     formData.append("image", selectedFile);
-    formData.append("from", fromFormat);
-    formData.append("to", toFormat);
+    formData.append("from", fileExtension); // The detected file format
+    formData.append("to", toFormat); // The desired conversion format
 
     try {
       const response = await axios.post("/api/image", formData, {
@@ -118,45 +116,25 @@ export default function Home() {
             />
           </div>
 
-          <div className="mb-4 flex justify-between">
-            {/* Convert from dropdown */}
-            <div className="w-1/2 mr-2">
-              <label className="block mb-2 font-semibold text-black">
-                Convert from:
-              </label>
-              <select
-                value={fromFormat}
-                onChange={handleFromFormatChange}
-                className="w-full outline-none border-none text-white bg-gray-500 px-4 py-2 border rounded-md"
-              >
-                {formats.map((format) => (
+          {/* Convert to dropdown */}
+          <div className="mb-4">
+            <label className="block mb-2 font-semibold text-black">
+              Convert to:
+            </label>
+            <select
+              value={toFormat}
+              onChange={handleToFormatChange}
+              className="w-full outline-none border-none text-white bg-gray-500 px-4 py-2 border rounded-md"
+            >
+              {/* Exclude the file's current format */}
+              {formats
+                .filter((format) => format !== fileExtension)
+                .map((format) => (
                   <option key={format} value={format}>
                     {format.toUpperCase()}
                   </option>
                 ))}
-              </select>
-            </div>
-
-            {/* Convert to dropdown */}
-            <div className="w-1/2 ml-2">
-              <label className="block mb-2 font-semibold text-black">
-                Convert to:
-              </label>
-              <select
-                value={toFormat}
-                onChange={handleToFormatChange}
-                className="w-full outline-none border-none text-white bg-gray-500 px-4 py-2 border rounded-md"
-              >
-                {/* Only show options that are not selected as 'From' */}
-                {formats
-                  .filter((format) => format !== fromFormat)
-                  .map((format) => (
-                    <option key={format} value={format}>
-                      {format.toUpperCase()}
-                    </option>
-                  ))}
-              </select>
-            </div>
+            </select>
           </div>
 
           <button

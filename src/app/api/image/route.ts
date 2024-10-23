@@ -6,10 +6,9 @@ export const POST = async (req: NextRequest) => {
     // Parse form data
     const formData = await req.formData();
     const file = formData.get("image") as File;
-    const fromFormat = formData.get("from") as string;
     const toFormat = formData.get("to") as string;
 
-    if (!file || !fromFormat || !toFormat) {
+    if (!file || !toFormat) {
       return NextResponse.json({ message: "Invalid input" }, { status: 400 });
     }
 
