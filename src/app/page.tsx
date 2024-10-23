@@ -146,7 +146,7 @@ export default function Home() {
         </form>
 
         {convertedImage && (
-          <div className="mt-8 p-8 border-gray-200 border-[1px] text-center shadow-2xl">
+          <div className="max-w-xl mt-8 p-8 border-gray-200 border-[1px] text-center shadow-2xl">
             <h3 className="text-xl font-semibold mb-4">Converted Image:</h3>
             <div className="border border-gray-300 p-4 inline-block">
               <Image
